@@ -22,14 +22,15 @@ jobs:
           script: |
             mkdir -p /home/${{ secrets.STAGING_USER }}/myapp
 
-      - name: Upload files to EC2
+      - name: Upload files to EC2 (debugging)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           source: "."
-          target: "/home/${{ secrets.STAGING_USER }}/myapp"
+          target: "/home/${{ secrets.STAGING_USER }}/"
+
 
       - name: Build and run Docker on EC2
         uses: appleboy/ssh-action@v1.0.0
