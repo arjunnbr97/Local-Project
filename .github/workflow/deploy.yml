@@ -13,14 +13,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+<<<<<<< HEAD
       - name: Upload files to EC2
+=======
+      - name: Create target folder on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            mkdir -p /home/${{ secrets.STAGING_USER }}/myapp
+
+      - name: Upload files to EC2 (debugging)
+>>>>>>> 0b932b52985c0434a1d513c15e0d1693644a9f79
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           source: "."
-          target: "/home/${{ secrets.STAGING_USER }}/myapp"
+          target: "/home/${{ secrets.STAGING_USER }}/"
+
 
       - name: Deploy Docker container on EC2
         uses: appleboy/ssh-action@v1.0.0
