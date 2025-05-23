@@ -1,0 +1,46 @@
+name: Deploy to EC2 Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Zip project
+        run: zip -r myapp.zip . -x "*.git*" "*.github*"
+
+      - name: Upload zip to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          source: "myapp.zip"
+          target: "/home/${{ secrets.STAGING_USER }}/"
+          strip_components: 0
+          debug: true
+
+      - name: Unzip and deploy on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.STAGING_USER }}
+            rm -rf myapp
+            mkdir myapp
+            unzip -o myapp.zip -d myapp
+            cd myapp
+            ls -la  # Confirm files present
+            docker stop myapp || true
+            docker rm myapp || true
+            docker build -t myapp .
+            docker run -d -p 80:80 --name myapp myapp
